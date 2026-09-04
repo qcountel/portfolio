@@ -1,6 +1,5 @@
 // ── Terminal ──────────────────────────────────────────────
-const BOT_TOKEN = '8473093299:AAHzRrwYPHBEQ50XCtM4YEdmfpbZGkTsU1s';
-const CHAT_ID   = '1264821926';
+const WORKER_URL = 'https://portfolio-tg.zanxxxxx1.workers.dev';
 
 const terminalInput = document.getElementById('terminal-input');
 const terminalLog   = document.getElementById('terminal-log');
@@ -13,19 +12,17 @@ function addLogLine(text, type = 'sent') {
   terminalLog.scrollTop = terminalLog.scrollHeight;
 }
 
-async function sendToTelegram(message) {
-  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-  const visitor = navigator.userAgent.slice(0, 60);
-  const text = `💬 portfolio message\n\n${message}\n\n📍 ${document.referrer || location.href}`;
+async function sendMessage(text) {
   try {
-    const res = await fetch(url, {
+    const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT_ID, text })
+      body: JSON.stringify({ text, website: '' }),
     });
-    return res.ok;
+    if (res.status === 429) return 'limit';
+    return res.ok ? 'ok' : 'err';
   } catch {
-    return false;
+    return 'err';
   }
 }
 
@@ -37,18 +34,23 @@ if (terminalInput) {
 
     terminalInput.value = '';
     terminalInput.disabled = true;
-
     addLogLine('> ' + msg, 'sent');
 
-    const ok = await sendToTelegram(msg);
+    const result = await sendMessage(msg);
+    const replies = {
+      ok:    ['  message sent.', 'ok'],
+      limit: ['  slow down. try again in a few minutes.', 'err'],
+      err:   ['  error. try again later.', 'err'],
+    };
+    addLogLine(...replies[result]);
 
-    addLogLine(ok ? '  message sent.' : '  error. try again later.', ok ? 'ok' : 'err');
     terminalInput.disabled = false;
     terminalInput.focus();
   });
 }
 // ─────────────────────────────────────────────────────────
 
+// ── Mobile menu ───────────────────────────────────────────
 const menuButton = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('.site-nav');
 
@@ -62,6 +64,7 @@ navigation.addEventListener('click', () => {
   menuButton.setAttribute('aria-expanded', 'false');
 });
 
+// ── Project filters ───────────────────────────────────────
 const filterButtons = document.querySelectorAll('.filter');
 const projects = document.querySelectorAll('.project-card');
 
@@ -79,6 +82,7 @@ filterButtons.forEach((button) => {
   });
 });
 
+// ── Reveal on scroll ──────────────────────────────────────
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
