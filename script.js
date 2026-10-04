@@ -1,12 +1,23 @@
 // ── 1. Новые визуальные эффекты ───────────────────────────
 
 // Рассеянный свет за курсором
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 const ambientGlow = document.getElementById('ambientGlow');
 if (ambientGlow) {
+  let frame = 0;
+  let mx = 0;
+  let my = 0;
   window.addEventListener('mousemove', (e) => {
-    ambientGlow.style.left = `${e.clientX}px`;
-    ambientGlow.style.top = `${e.clientY}px`;
-  });
+    mx = e.clientX;
+    my = e.clientY;
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      ambientGlow.style.left = `${mx}px`;
+      ambientGlow.style.top = `${my}px`;
+      frame = 0;
+    });
+  }, { passive: true });
 }
 
 // Spotlight-подсветка на карточках проектов вслед за мышью
@@ -21,7 +32,7 @@ projectCards.forEach((card) => {
 
 // 3D-Tilt эффект для окна терминала (только на десктопе)
 const terminalWindow = document.getElementById('heroTerminal');
-if (terminalWindow) {
+if (terminalWindow && !reduceMotion) {
   terminalWindow.addEventListener('mousemove', (e) => {
     if (window.innerWidth <= 1050) return;
     const rect = terminalWindow.getBoundingClientRect();
@@ -39,6 +50,7 @@ if (terminalWindow) {
 const WORKER_URL = 'https://portfolio-tg.zanxxxxx1.workers.dev';
 
 const terminalInput = document.getElementById('terminal-input');
+const honeypot      = document.getElementById('terminal-website');
 const terminalLog   = document.getElementById('terminal-log');
 
 function addLogLine(text, type = 'sent') {
@@ -55,7 +67,7 @@ async function sendMessage(text) {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, website: '' }),
+      body: JSON.stringify({ text, website: honeypot ? honeypot.value : '' }),
     });
     if (res.status === 429) return 'limit';
     return res.ok ? 'ok' : 'err';
@@ -73,8 +85,11 @@ if (terminalInput) {
     terminalInput.value = '';
     terminalInput.disabled = true;
     addLogLine('> ' + msg, 'sent');
+    addLogLine('  sending...', 'wait');
+    const pending = terminalLog ? terminalLog.lastElementChild : null;
 
     const result = await sendMessage(msg);
+    if (pending) pending.remove();
     const replies = {
       ok:    ['  message sent.', 'ok'],
       limit: ['  slow down. try again in a few minutes.', 'err'],
@@ -107,12 +122,26 @@ if (menuButton && navigation) {
 const filterButtons = document.querySelectorAll('.filter');
 const projects = document.querySelectorAll('.project-card');
 
+// Счётчики в фильтрах считаются по карточкам, чтобы не расходились с реальностью
+filterButtons.forEach((button) => {
+  const filter = button.dataset.filter;
+  const count = filter === 'all'
+    ? projects.length
+    : [...projects].filter((p) => p.dataset.category.split(' ').includes(filter)).length;
+  const sup = button.querySelector('sup');
+  if (sup) sup.textContent = String(count).padStart(2, '0');
+});
+
 filterButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const filter = button.dataset.filter;
 
-    filterButtons.forEach((item) => item.classList.remove('active'));
+    filterButtons.forEach((item) => {
+      item.classList.remove('active');
+      item.setAttribute('aria-pressed', 'false');
+    });
     button.classList.add('active');
+    button.setAttribute('aria-pressed', 'true');
 
     projects.forEach((project) => {
       const categories = project.dataset.category.split(' ');
@@ -122,13 +151,18 @@ filterButtons.forEach((button) => {
 });
 
 // ── 5. Scroll Reveal (Плавное появление) ──────────────────
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.08 });
+const revealElements = document.querySelectorAll('.reveal');
+if (reduceMotion || !('IntersectionObserver' in window)) {
+  revealElements.forEach((element) => element.classList.add('visible'));
+} else {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
 
-document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
+  revealElements.forEach((element) => observer.observe(element));
+}
