@@ -5,10 +5,8 @@
   const canvas = document.getElementById('padCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  const statusEl = document.getElementById('padStatus');
   const chips = document.querySelectorAll('[data-skin]');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const DEMO_TEXT = 'демо · подключи геймпад и нажми любую кнопку';
 
   // ---- colours ([r, g, b, a], a = 0..255)
   const hex = (h, a = 255) => [(h >> 16) & 255, (h >> 8) & 255, h & 255, a];
@@ -120,6 +118,70 @@
   };
   const DIRS = [['up', 0, -1], ['down', 0, 1], ['left', -1, 0], ['right', 1, 0]];
 
+  // Port of rounded/cross_outline/cross_arm/vader_dpad from Controllin
+  // 1.16-modules-v2, skins.rs @ fd64eb72b71b635b44494f200122ae24e651c2eb.
+  // Canvas fills the concave outline directly; GPU ear-clipping is unnecessary.
+  function rounded(pts, radii) {
+    const out = [], n = pts.length;
+    pts.forEach((p, i) => {
+      const rad = radii[i];
+      if (rad <= 0) { out.push(p); return; }
+      const unit = (q) => {
+        const dx = q[0] - p[0], dy = q[1] - p[1];
+        const len = Math.max(Math.hypot(dx, dy), 1e-3);
+        return [[dx / len, dy / len], len];
+      };
+      const [ua, la] = unit(pts[(i + n - 1) % n]);
+      const [ub, lb] = unit(pts[(i + 1) % n]);
+      const k = Math.min(rad, la / 2, lb / 2);
+      const a = [p[0] + ua[0] * k, p[1] + ua[1] * k];
+      const b = [p[0] + ub[0] * k, p[1] + ub[1] * k];
+      for (let j = 0; j <= 5; j++) {
+        const t = j / 5, u = (1 - t) ** 2, v = 2 * (1 - t) * t, w = t * t;
+        out.push([u * a[0] + v * p[0] + w * b[0], u * a[1] + v * p[1] + w * b[1]]);
+      }
+    });
+    return out;
+  }
+  function crossOutline(cx, cy, h, l, outer, inner) {
+    return rounded([
+      [cx-h,cy-l],[cx+h,cy-l],[cx+h,cy-h],
+      [cx+l,cy-h],[cx+l,cy+h],[cx+h,cy+h],
+      [cx+h,cy+l],[cx-h,cy+l],[cx-h,cy+h],
+      [cx-l,cy+h],[cx-l,cy-h],[cx-h,cy-h],
+    ], [outer,outer,inner,outer,outer,inner,outer,outer,inner,outer,outer,inner]);
+  }
+  function crossArm(cx, cy, h, l, ux, uy, outer) {
+    const at = (along, side) => [cx + ux * along - uy * side, cy + uy * along + ux * side];
+    return rounded([at(h,-h),at(l,-h),at(l,h),at(h,h)], [0,outer,outer,0]);
+  }
+  function vaderDpad(p, cx, cy, acc, onAcc) {
+    const H = 12.5, L = 35, OUTER_R = 6, INNER_R = 3.5;
+    disc(cx, cy, 41, darker(V.body, 0.75));
+    ring(cx, cy, 41, lighter(V.body, 0.10), 1.5);
+    ring(cx, cy, 38.5, [0,0,0,90], 2.5);
+    let tx = 0, ty = 0;
+    for (const [key, ux, uy] of DIRS) {
+      if (p.b[key]) { tx += ux * 1.6; ty += uy * 1.6; }
+    }
+    const x = cx + tx, y = cy + ty;
+    fill(crossOutline(cx+1.5, cy+2.5, H,L,OUTER_R,INNER_R), [0,0,0,110]);
+    const outline = crossOutline(x,y,H,L,OUTER_R,INNER_R);
+    fill(outline, grad(y-L,y+L,lighter(V.dpad,0.16),darker(V.dpad,0.2)));
+    // Canvas anti-aliases the perimeter, replacing egui's feather mesh.
+    for (const [key, ux, uy] of DIRS) {
+      if (p.b[key]) fill(crossArm(x,y,H,L,ux,uy,OUTER_R), grad(y-L,y+L,lighter(acc,0.15),acc));
+    }
+    edgeLine(outline, edge(V.dpad), 1.2);
+    for (const [key, ux, uy] of DIRS) {
+      const tip = L-8.5, base = L-14.5, w = 3.8;
+      fill([[x+ux*tip,y+uy*tip],[x+ux*base-uy*w,y+uy*base+ux*w],
+        [x+ux*base+uy*w,y+uy*base-ux*w]], alpha(p.b[key] ? onAcc : lighter(V.dpad,0.35),200));
+    }
+    disc(x,y,8.5,darker(V.dpad,0.25));
+    ring(x,y,8.5,lighter(V.dpad,0.12),1);
+  }
+
   // ---- v4pro (Flydigi Vader 4 Pro)
   function vader(p) {
     const b = (k) => p.b[k];
@@ -170,16 +232,8 @@
     stick(123, 167, p.lx, p.ly, b('ls'));
     stick(320, 252, p.rx, p.ry, b('rs'));
 
-    const [dx, dy] = [191, 245];
-    disc(dx, dy, 40, darker(V.dpad, 0.4));
-    ring(dx, dy, 40, edge(V.dpad), 1.5);
-    for (const [k, ux, uy] of DIRS) {
-      const [w, h] = ux ? [36, 27] : [27, 36];
-      const x = dx + ux * 22 - w / 2, y = dy + uy * 22 - h / 2;
-      rr(x, y, w, h, 4, b(k) ? acc : V.dpad);
-      rrLine(x, y, w, h, 4, edge(V.dpad), 1.2);
-    }
-    rr(dx - 13.5, dy - 13.5, 27, 27, 2, V.dpad);
+    // One connected cross; the old overlapping rectangles erased pressed arms.
+    vaderDpad(p, 191, 245, acc, onAcc);
 
     for (const [k, l, x, y] of [['y', 'Y', 385, 130], ['x', 'X', 352, 163], ['b', 'B', 418, 163], ['a', 'A', 385, 196]]) {
       const pr = b(k);
@@ -342,12 +396,8 @@
     if (live && live.id !== lastId) {
       lastId = live.id;
       if (!userPicked) setSkin(/054c|dualshock|dualsense|wireless controller|playstation/i.test(live.id) ? 'ds4' : 'v4pro');
-      statusEl.textContent = 'подключён · ' + live.id.replace(/\s*\(.*\)\s*$/, '').slice(0, 40);
-      statusEl.classList.add('live');
     } else if (!live && lastId !== null) {
       lastId = null;
-      statusEl.textContent = DEMO_TEXT;
-      statusEl.classList.remove('live');
     }
     const pad = live ? live.pad : demoPad(reduceMotion ? 0 : now / 1000);
 
@@ -370,7 +420,6 @@
     if (want && !running) { running = true; requestAnimationFrame((t) => frame(t)); }
     if (!want) running = false;
   };
-  statusEl.textContent = DEMO_TEXT;
   new ResizeObserver(resize).observe(canvas);
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; update(); }).observe(canvas);
   document.addEventListener('visibilitychange', update);
