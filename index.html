@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>anx1ous / software & mcpe</title>
   <meta name="description" content="Портфолио anx1ous: Windows-утилиты, инструменты для Minecraft, Rust-библиотеки и ресурспаки.">
   <link rel="canonical" href="https://anx1ous.ru/">
@@ -16,10 +16,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script>document.documentElement.classList.add('js');</script>
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=3">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-  <script src="scene.js?v=2" defer></script>
-  <script src="app.js?v=2" defer></script>
+  <script src="scene.js?v=3" defer></script>
+  <script src="app.js?v=3" defer></script>
 </head>
 <body>
   <div class="loader" aria-hidden="true">
@@ -83,7 +83,7 @@
       <header class="sec-head reveal">
         <p class="eyebrow">Selected work / 2025–2026</p>
         <h2 class="px-title">Инвентарь</h2>
-        <p class="sec-lead">Наведи на предмет, чтобы посмотреть, клик — открыть.</p>
+        <p class="sec-lead"><span class="hover-only">Наведи на предмет, чтобы посмотреть, клик — открыть.</span><span class="touch-only">Нажми на предмет, чтобы посмотреть описание.</span></p>
       </header>
       <div class="inv-grid reveal">
         <div class="inv-box">
@@ -107,7 +107,9 @@
                data-name="anx1ous archive" data-kind="TELEGRAM" data-desc="Telegram-архив всех проектов: инжекторы, утилиты, ресурспаки и мелкие проекты." data-tags="TELEGRAM · RELEASES"><span>anx1ous archive</span></a>
           </div>
         </div>
+        <div class="sheet-bd" id="sheet-bd" hidden></div>
         <aside class="tooltip" id="tooltip" aria-live="polite">
+          <button class="tt-close" type="button" aria-label="Закрыть">✕</button>
           <p class="tt-name">Controllin</p>
           <p class="tt-rarity">Легендарный · CLIENT + INJECTOR</p>
           <p class="tt-desc">Клиент для Bedrock 1.16.100.4, 1.21.114 и 26.52 с упором на геймпад.</p>
@@ -133,7 +135,7 @@
       <header class="sec-head reveal">
         <p class="eyebrow">Contact</p>
         <h2 class="px-title">Написать</h2>
-        <p class="sec-lead">Нажми <kbd>T</kbd>, как в игре. Сообщение придёт мне через Telegram-бота. Ответить через сайт я не смогу, поэтому оставь свой @username, если ждёшь ответа.</p>
+        <p class="sec-lead"><span class="hover-only">Нажми <kbd>T</kbd>, как в игре. </span>Сообщение придёт мне через Telegram-бота. Ответить через сайт я не смогу, поэтому оставь свой @username, если ждёшь ответа.</p>
       </header>
       <div class="chat reveal">
         <div class="chat-log" id="chat-log">
@@ -143,7 +145,8 @@
         <label class="chat-input">
           <span>&gt;</span>
           <input class="hp-field" id="chat-website" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <input id="chat-input" type="text" maxlength="1000" placeholder="сообщение и твой @username, Enter — отправить" autocomplete="off" aria-label="Сообщение автору">
+          <input id="chat-input" type="text" maxlength="1000" placeholder="сообщение и твой @username" enterkeyhint="send" autocomplete="off" aria-label="Сообщение автору">
+          <button class="chat-send" id="chat-send" type="button" aria-label="Отправить">↵</button>
         </label>
       </div>
       <div class="links reveal">

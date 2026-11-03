@@ -53,11 +53,31 @@
       $('.tt-open', tip).href = it.href;
       tip.classList.remove('flash'); void tip.offsetWidth; tip.classList.add('flash');
     };
+    // Phones / touch: a tap only shows the item in a bottom sheet; the link opens from the sheet's button.
+    // Mouse: hover shows it, click opens the link.
+    const sheetMQ = matchMedia('(max-width: 640px), (hover: none)');
+    const bd = $('#sheet-bd');
+    let lastPtr = '';
+    const openSheet = () => {
+      if (!sheetMQ.matches) return;
+      tip.classList.add('open'); if (bd) bd.hidden = false; document.body.classList.add('sheet-on');
+    };
+    const closeSheet = () => {
+      tip.classList.remove('open'); if (bd) bd.hidden = true; document.body.classList.remove('sheet-on');
+    };
     items.forEach((it) => {
+      it.addEventListener('pointerdown', (e) => { lastPtr = e.pointerType; });
       it.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') select(it); });
-      it.addEventListener('focus', () => select(it));
-      it.addEventListener('click', (e) => { if (sel !== it) { e.preventDefault(); select(it); } });
+      it.addEventListener('focus', () => { if (!sheetMQ.matches) select(it); });
+      it.addEventListener('click', (e) => {
+        if (sheetMQ.matches || lastPtr === 'touch' || lastPtr === 'pen') { e.preventDefault(); select(it); openSheet(); }
+        lastPtr = '';
+      });
     });
+    $('.tt-close', tip)?.addEventListener('click', closeSheet);
+    bd?.addEventListener('click', closeSheet);
+    addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+    sheetMQ.addEventListener?.('change', closeSheet);
     select(items[0]);
   }
 
@@ -112,13 +132,20 @@
   // ---------- chat -> Telegram via Worker
   const WORKER_URL = 'https://portfolio-tg.zanxxxxx1.workers.dev';
   const log = $('#chat-log'); const honeypot = $('#chat-website');
+  const sheetMQ2 = matchMedia('(max-width: 640px), (hover: none)');
   const line = (html, cls) => { const p = document.createElement('p'); if (cls) p.className = cls; p.innerHTML = html; log.append(p); log.scrollTop = log.scrollHeight; return p; };
   const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   if (chatInput && log) {
-    chatInput.addEventListener('keydown', async (e) => {
+    const sendBtn = $('#chat-send');
+    chatInput.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { chatInput.blur(); return; }
-      if (e.key !== 'Enter') return;
-      const msg = chatInput.value.trim(); if (!msg) return;
+      if (e.key === 'Enter') { e.preventDefault(); send(); }
+    });
+    sendBtn?.addEventListener('click', () => send());
+    let busy = false;
+    const send = async () => {
+      const msg = chatInput.value.trim(); if (!msg || busy) return;
+      busy = true; if (sendBtn) sendBtn.disabled = true;
       chatInput.value = ''; chatInput.disabled = true;
       line(`<b>&lt;ты&gt;</b> ${esc(msg)}`, 'me');
       const wait = line('<b class="c-gold">[Сервер]</b> отправка...');
@@ -130,7 +157,8 @@
       wait.remove();
       const msgs = { ok: ['сообщение доставлено anx1ous.', 'ok'], limit: ['не так быстро. попробуй через пару минут.', 'err'], err: ['ошибка отправки. попробуй позже или напиши в @anx1ous.', 'err'] };
       line(`<b class="c-gold">[Сервер]</b> ${msgs[r][0]}`, msgs[r][1]);
-      chatInput.disabled = false; chatInput.focus();
-    });
+      chatInput.disabled = false; busy = false; if (sendBtn) sendBtn.disabled = false;
+      if (!sheetMQ2.matches) chatInput.focus(); // on phones don't pop the keyboard back up
+    };
   }
 })();

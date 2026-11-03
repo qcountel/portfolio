@@ -223,10 +223,21 @@ kbd { padding: 2px 8px; background: #48494a; box-shadow: 0 0 0 2px #1e1e1f, inse
 .foot-in p { margin: 0; }
 .foot-in a:hover { color: var(--glow); }
 
-/* ---------- pixel reveal */
+/* ---------- pixel reveal (fill "backwards": no clip-path/transform left behind, so fixed children are not clipped) */
 .js .reveal { opacity: 0; }
-.js .reveal.in { opacity: 1; animation: pixin .5s steps(5) both; }
+.js .reveal.in { opacity: 1; animation: pixin .5s steps(5) backwards; }
 @keyframes pixin { from { clip-path: inset(0 0 100% 0); transform: translateY(16px); } to { clip-path: inset(0 0 -30px 0); transform: none; } }
+
+/* ---------- touch vs mouse hints, sheet + send button base */
+.touch-only { display: none; }
+@media (hover: none) { .hover-only { display: none; } .touch-only { display: inline; } }
+.tt-close { display: none; }
+.sheet-bd { position: fixed; inset: 0; z-index: 85; background: rgba(0, 0, 0, .6); }
+.sheet-bd[hidden] { display: none; }
+body.sheet-on { overflow: hidden; }
+.chat-send { flex: none; width: 44px; height: 38px; border: 0; background: #b3401a; color: #fff; font-size: 18px; cursor: pointer; box-shadow: 0 0 0 2px #1e1e1f, inset 0 2px 0 rgba(255, 220, 160, .35), inset 0 -4px 0 #6e220b; }
+.chat-send:hover { background: #cc4d1f; }
+.chat-send:disabled { opacity: .5; cursor: default; }
 
 /* ---------- adaptive */
 @media (max-width: 1000px) {
@@ -236,21 +247,75 @@ kbd { padding: 2px 8px; background: #48494a; box-shadow: 0 0 0 2px #1e1e1f, inse
   .toasts { grid-template-columns: repeat(2, 1fr); }
   .tooltip { position: static; min-height: 0; }
 }
+
+/* item card becomes a bottom sheet on phones and touch screens */
+@media (max-width: 640px), (hover: none) {
+  .tooltip {
+    position: fixed; inset: auto 0 0 0; z-index: 90;
+    min-height: 0; max-height: 78vh; overflow-y: auto;
+    padding: 30px 20px calc(22px + env(safe-area-inset-bottom));
+    background: #10000f;
+    box-shadow: 0 -3px 0 #000, inset 0 3px 0 #2d0a63, inset 0 6px 0 #1d0640;
+    transform: translateY(105%); visibility: hidden;
+    transition: transform .25s steps(5), visibility 0s .25s;
+  }
+  .tooltip.open { transform: none; visibility: visible; transition: transform .25s steps(5); }
+  .tooltip.flash { animation: none; }
+  .tt-close { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 40px; height: 40px; border: 0; background: #2a2224; color: #fff; font-size: 16px; box-shadow: 0 0 0 2px #000; cursor: pointer; }
+  .tt-name { padding-right: 52px; }
+  .tt-open { display: flex; justify-content: center; padding: 16px; background: #b3401a; color: #fff; box-shadow: 0 0 0 2px #1e1e1f, inset 0 2px 0 rgba(255, 220, 160, .35), inset 0 -5px 0 #6e220b; }
+  .tt-open:hover { color: #fff; background: #cc4d1f; }
+}
+
+/* phones */
 @media (max-width: 640px) {
-  :root { --top: 58px; }
+  :root { --top: 52px; }
   .shell { width: calc(100% - 32px); }
-  .top { padding: 0 12px; }
-  .brand > span:last-child { display: none; }
-  .slot { height: 36px; }
-  .hero { align-items: flex-end; padding-bottom: 120px; }
-  .splash { left: auto; right: 0; bottom: -22px; }
-  .hero-lead { font-size: 14px; }
-  .btn { padding: 12px 16px 14px; font-size: 9px; }
-  .slots { grid-template-columns: repeat(4, 1fr); }
+  body { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
+  .top { padding: 0 16px; backdrop-filter: none; background: rgba(20, 9, 9, .96); } /* backdrop-filter would trap the fixed hotbar inside the header */
+  /* hotbar moves to the bottom edge, like Bedrock on a phone */
+  .hotbar {
+    position: fixed; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); z-index: 60;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+  }
+  .slot { height: 54px; flex-direction: column; justify-content: center; gap: 7px; padding: 0 4px; font-size: 11px; }
+  .slot span { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .hero { min-height: 100svh; align-items: flex-end; padding: calc(var(--top) + 24px) 0 calc(96px + env(safe-area-inset-bottom)); }
+  .xp { display: none; }
+  .logo-wrap { margin-bottom: 20px; }
+  .hero-title { font-size: clamp(18px, 5.6vw, 26px); }
+  .splash { left: auto; right: 0; top: -30px; bottom: auto; font-size: 9px; }
+  .hero-lead { margin-bottom: 24px; font-size: 14px; }
+  .hero-actions, .links { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .hero-actions .btn:last-child:nth-child(odd), .links .btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .btn { justify-content: center; padding: 15px 10px 17px; font-size: 9px; }
+  .btn:active { padding: 17px 10px 15px; }
+
+  .boss, .inv, .chat-sec { padding-top: 72px; }
+  .chat-sec { padding-bottom: 56px; }
+  .sec-head { margin-bottom: 28px; }
+  .sec-head h2 { font-size: 24px; text-shadow: 3px 3px 0 #3f3f3f; }
+  .sec-lead { font-size: 14px; }
+  .boss-grid { gap: 28px; }
+  .frame { max-width: none; padding: 12px; box-shadow: 0 0 0 3px #000, inset 0 0 0 3px #3d1527, 6px 6px 0 rgba(0, 0, 0, .45); }
+  .boss-copy .lead { font-size: 15px; }
+  .tags { margin-bottom: 24px; }
+
+  .inv-box { padding: 12px 12px 16px; box-shadow: 0 0 0 4px #000, inset 4px 4px 0 #4a3b3f, inset -4px -4px 0 #0e0a0b; }
+  .slots { grid-template-columns: repeat(4, 1fr); gap: 6px; }
   .item { width: auto; height: auto; aspect-ratio: 1; }
-  .item canvas { width: 70%; height: 70%; }
-  .toasts { grid-template-columns: 1fr; }
-  .boss, .inv, .chat-sec { padding-top: 100px; }
+  .item canvas { width: 66%; height: 66%; }
+  .achv { margin-top: 56px; }
+  .toasts { grid-template-columns: 1fr; gap: 12px; }
+  .toast { padding: 12px 14px; }
+
+  .chat-log { min-height: 120px; padding: 14px; }
+  .chat-log p { font-size: 13px; }
+  .chat-input { padding: 10px 10px 10px 14px; }
+  .chat-input input:not(.hp-field) { font-size: 16px; } /* 16px: iOS doesn't zoom into the field */
+  .links { margin-top: 24px; }
+  .foot-in { flex-direction: column; gap: 14px; padding: 22px 0 26px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
