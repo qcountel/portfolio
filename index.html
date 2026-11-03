@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>anx1ous / software & mcpe</title>
+  <meta name="description" content="Портфолио anx1ous: Windows-утилиты, инструменты для Minecraft, Rust-библиотеки и ресурспаки.">
+  <link rel="canonical" href="https://anx1ous.ru/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://anx1ous.ru/">
+  <meta property="og:title" content="anx1ous / software & mcpe">
+  <meta property="og:description" content="Windows-утилиты, инструменты для Minecraft, Rust-библиотеки и ресурспаки.">
+  <meta name="theme-color" content="#140909">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>document.documentElement.classList.add('js');</script>
+  <link rel="stylesheet" href="styles.css?v=2">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <script src="scene.js?v=2" defer></script>
+  <script src="app.js?v=2" defer></script>
+</head>
+<body>
+  <div class="loader" aria-hidden="true">
+    <p class="px-title">Загрузка мира</p>
+    <div class="loader-bar"><i></i></div>
+    <p class="loader-tip">Генерация местности...</p>
+  </div>
+
+  <header class="top">
+    <a class="brand" href="#home"><span class="brand-mark">A</span><span>ANX1OUS</span></a>
+    <nav class="hotbar" aria-label="Разделы">
+      <a class="slot" href="#home" data-key="1"><b>1</b><span>Старт</span></a>
+      <a class="slot" href="#controllin" data-key="2"><b>2</b><span>Controllin</span></a>
+      <a class="slot" href="#inventory" data-key="3"><b>3</b><span>Проекты</span></a>
+      <a class="slot" href="#chat" data-key="4"><b>4</b><span>Связь</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="home" data-section>
+      <canvas class="world" id="world" aria-hidden="true"></canvas>
+      <div class="ash" aria-hidden="true"></div>
+      <div class="hero-copy shell">
+        <div class="logo-wrap">
+          <h1 class="px-title hero-title">Софт для Windows<br>и инструменты<br>для <em>MCPE</em></h1>
+          <p class="splash" aria-hidden="true">Теперь с геймпадом!</p>
+        </div>
+        <p class="hero-lead">Делаю <span class="typed" data-words="инжекторы|игровые клиенты|оверлеи на DX11/DX12|лаунчеры|утилиты на Go">инжекторы</span><i class="caret">_</i><br>C++ · Rust · Go · Win32 · Direct3D</p>
+        <div class="hero-actions">
+          <a class="btn btn-main" href="#inventory">Проекты</a>
+          <a class="btn" href="https://github.com/qcountel" target="_blank" rel="noreferrer">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="xp" aria-hidden="true"><b>26</b><div class="xp-bar"><i></i></div></div>
+    </section>
+
+    <section class="boss shell" id="controllin" data-section>
+      <header class="sec-head reveal">
+        <p class="eyebrow">Главный проект</p>
+        <h2 class="px-title">Controllin</h2>
+      </header>
+      <div class="boss-grid">
+        <figure class="frame reveal">
+          <img src="controllin.jpg" width="480" height="480" alt="Арт Controllin: геймпад в осеннем мире Minecraft">
+        </figure>
+        <div class="boss-copy reveal">
+          <p class="lead">Клиент для Minecraft Bedrock с упором на геймпад: меню целиком управляется с геймпада, настраиваются чувствительность и мёртвая зона, есть Gamepad Viewer, Replay и десятки твиков.</p>
+          <div class="vers"><span>1.16.100.4</span><span>1.21.114</span><span>26.52</span></div>
+          <p>Запускается через Controllin Injector: старт игры, загрузка DLL из GitHub-релизов, выдача прав ACL и инъекция.</p>
+          <ul class="tags"><li>RUST</li><li>EGUI</li><li>DIRECT3D 11</li><li>C++</li><li>WXWIDGETS</li></ul>
+          <div class="hero-actions">
+            <a class="btn btn-main" href="https://controllin.ru" target="_blank" rel="noreferrer">controllin.ru ↗</a>
+            <a class="btn" href="https://github.com/qcountel/controllin" target="_blank" rel="noreferrer">Исходники ↗</a>
+            <a class="btn" href="https://t.me/cntrlln" target="_blank" rel="noreferrer">@cntrlln ↗</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="inv shell" id="inventory" data-section>
+      <header class="sec-head reveal">
+        <p class="eyebrow">Selected work / 2025–2026</p>
+        <h2 class="px-title">Инвентарь</h2>
+        <p class="sec-lead">Наведи на предмет, чтобы посмотреть, клик — открыть.</p>
+      </header>
+      <div class="inv-grid reveal">
+        <div class="inv-box">
+          <p class="inv-label">Проекты</p>
+          <div class="slots" id="slots">
+            <a class="item" href="https://github.com/qcountel/controllin" target="_blank" rel="noreferrer" data-icon="pad" data-count="3" data-rarity="legend"
+               data-name="Controllin" data-kind="CLIENT + INJECTOR" data-desc="Клиент для Bedrock 1.16.100.4, 1.21.114 и 26.52 с упором на геймпад. Gamepad Viewer, Replay и десятки модулей." data-tags="RUST · EGUI · DIRECT3D 11 · C++"><span>Controllin</span></a>
+            <a class="item" href="https://github.com/qcountel/anx1ous" target="_blank" rel="noreferrer" data-icon="chip" data-rarity="epic"
+               data-name="anx1ous" data-kind="DLL" data-desc="Форк Aerial для MCPE 1.1.5: ClickGUI, D3D-рендер, 40+ модулей." data-tags="C++ · DIRECT3D"><span>anx1ous</span></a>
+            <a class="item" href="https://github.com/qcountel/anx1ous-injector" target="_blank" rel="noreferrer" data-icon="inj" data-rarity="epic"
+               data-name="anx1ous injector" data-kind="LAUNCHER" data-desc="Win32-лаунчер: запуск сборки, загрузка DLL, настройка ACL и инъекция." data-tags="C++ · UWP"><span>anx1ous injector</span></a>
+            <a class="item" href="https://github.com/qcountel/overhook" target="_blank" rel="noreferrer" data-icon="hook" data-rarity="rare"
+               data-name="overhook" data-kind="RUST CRATE" data-desc="Rust-крейт для внутриигровых оверлеев: хук DX11/DX12 и подключаемый UI на egui или imgui." data-tags="RUST · DIRECT3D · EGUI"><span>overhook</span></a>
+            <a class="item" href="https://github.com/qcountel/zUtility" target="_blank" rel="noreferrer" data-icon="wrench" data-rarity="rare"
+               data-name="zUtility" data-kind="UTILITY" data-desc="Модульная утилита для MCPE: автокликер, ресурспаки, геймпад, сохранение настроек." data-tags="GO · FYNE · MCPE"><span>zUtility</span></a>
+            <a class="item" href="https://github.com/qcountel/mcpe-installer/tree/main" target="_blank" rel="noreferrer" data-icon="chest" data-rarity="common"
+               data-name="MCPE 1.1.5 installer" data-kind="INSTALLER" data-desc="Установка отдельной сборки 1.1.5." data-tags="WIN32 · APPX"><span>MCPE 1.1.5 installer</span></a>
+            <a class="item" href="https://github.com/qcountel/MCPE-injector" target="_blank" rel="noreferrer" data-icon="needle" data-rarity="common"
+               data-name="MCPE injector" data-kind="INJECTOR" data-desc="Win32 DLL-инжектор с выдачей прав ACL и логом каждого этапа." data-tags="C++ · ACL"><span>MCPE injector</span></a>
+            <a class="item" href="https://t.me/anx1ous_archive" target="_blank" rel="noreferrer" data-icon="plane" data-rarity="common"
+               data-name="anx1ous archive" data-kind="TELEGRAM" data-desc="Telegram-архив всех проектов: инжекторы, утилиты, ресурспаки и мелкие проекты." data-tags="TELEGRAM · RELEASES"><span>anx1ous archive</span></a>
+          </div>
+        </div>
+        <aside class="tooltip" id="tooltip" aria-live="polite">
+          <p class="tt-name">Controllin</p>
+          <p class="tt-rarity">Легендарный · CLIENT + INJECTOR</p>
+          <p class="tt-desc">Клиент для Bedrock 1.16.100.4, 1.21.114 и 26.52 с упором на геймпад.</p>
+          <p class="tt-tags">RUST · EGUI · DIRECT3D 11 · C++</p>
+          <a class="tt-open" href="https://github.com/qcountel/controllin" target="_blank" rel="noreferrer">Открыть ↗</a>
+        </aside>
+      </div>
+
+      <div class="achv">
+        <p class="eyebrow reveal">Достижения</p>
+        <div class="toasts" id="toasts">
+          <div class="toast" style="--i:0"><i data-icon="chip"></i><div><b>Сырые указатели</b><span>C++ и Win32 API</span></div></div>
+          <div class="toast" style="--i:1"><i data-icon="hook"></i><div><b>Друг borrow checker</b><span>Rust, egui, крейты</span></div></div>
+          <div class="toast" style="--i:2"><i data-icon="wrench"></i><div><b>Горутины</b><span>Go и Fyne</span></div></div>
+          <div class="toast" style="--i:3"><i data-icon="pad"></i><div><b>Перехватчик кадров</b><span>Хуки DX11 / DX12</span></div></div>
+          <div class="toast" style="--i:4"><i data-icon="needle"></i><div><b>Права выданы</b><span>ACL, AppX, UWP</span></div></div>
+          <div class="toast" style="--i:5"><i data-icon="chest"></i><div><b>Коллекционер версий</b><span>1.1.5 → 26.52</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chat-sec shell" id="chat" data-section>
+      <header class="sec-head reveal">
+        <p class="eyebrow">Contact</p>
+        <h2 class="px-title">Написать</h2>
+        <p class="sec-lead">Нажми <kbd>T</kbd>, как в игре. Сообщение придёт мне через Telegram-бота. Ответить через сайт я не смогу, поэтому оставь свой @username, если ждёшь ответа.</p>
+      </header>
+      <div class="chat reveal">
+        <div class="chat-log" id="chat-log">
+          <p><b class="c-gold">[Сервер]</b> сообщения отсюда приходят anx1ous через бота, ответов в этом чате не будет</p>
+          <p><b class="c-gold">[Сервер]</b> нужен ответ — добавь свой Telegram @username или пиши напрямую в @anx1ous</p>
+        </div>
+        <label class="chat-input">
+          <span>&gt;</span>
+          <input class="hp-field" id="chat-website" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <input id="chat-input" type="text" maxlength="1000" placeholder="сообщение и твой @username, Enter — отправить" autocomplete="off" aria-label="Сообщение автору">
+        </label>
+      </div>
+      <div class="links reveal">
+        <a class="btn" href="https://t.me/anx1ous" target="_blank" rel="noreferrer">TG @anx1ous ↗</a>
+        <a class="btn" href="https://t.me/anx1ous_archive" target="_blank" rel="noreferrer">TG Archive ↗</a>
+        <a class="btn" href="https://steamcommunity.com/id/anx1ouss/" target="_blank" rel="noreferrer">Steam ↗</a>
+        <a class="btn" href="https://github.com/qcountel" target="_blank" rel="noreferrer">GitHub ↗</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="nylium" aria-hidden="true"></div>
+    <div class="foot-in shell">
+      <p>© 2026 ANX1OUS</p>
+      <a href="#home">Наверх ↑</a>
+    </div>
+  </footer>
+</body>
+</html>
