@@ -4,6 +4,8 @@ const WORKER_URL = 'https://portfolio-tg.zanxxxxx1.workers.dev';
 const terminalInput = document.getElementById('terminal-input');
 const honeypot = document.getElementById('terminal-website');
 const terminalLog = document.getElementById('terminal-log');
+const contactForm = document.getElementById('contact-form');
+const submitButton = contactForm?.querySelector('[type="submit"]');
 
 function addLogLine(text, type = 'sent') {
   if (!terminalLog) return;
@@ -28,44 +30,31 @@ async function sendMessage(text) {
   }
 }
 
-if (terminalInput) {
-  terminalInput.addEventListener('keydown', async (e) => {
-    if (e.key !== 'Enter') return;
+if (contactForm) {
+  contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
     const msg = terminalInput.value.trim();
-    if (!msg) return;
+    if (!msg || submitButton.disabled) return;
 
-    terminalInput.value = '';
     terminalInput.disabled = true;
-    addLogLine('> ' + msg, 'sent');
-    addLogLine('  sending...', 'wait');
+    submitButton.disabled = true;
+    terminalLog.replaceChildren();
+    addLogLine('Отправляю…', 'wait');
     const pending = terminalLog ? terminalLog.lastElementChild : null;
 
     const result = await sendMessage(msg);
     if (pending) pending.remove();
     const replies = {
-      ok: ['  message sent.', 'ok'],
-      limit: ['  slow down. try again in a few minutes.', 'err'],
-      err: ['  error. try again later.', 'err'],
+      ok: ['Сообщение отправлено.', 'ok'],
+      limit: ['Подожди несколько минут и попробуй снова.', 'err'],
+      err: ['Не удалось отправить. Попробуй ещё раз.', 'err'],
     };
     addLogLine(...replies[result]);
 
+    if (result === 'ok') terminalInput.value = '';
     terminalInput.disabled = false;
+    submitButton.disabled = false;
     terminalInput.focus();
-  });
-}
-
-// ── Мобильное меню ────────────────────────────────────────
-const menuButton = document.querySelector('.menu-toggle');
-const navigation = document.querySelector('.site-nav');
-
-if (menuButton && navigation) {
-  menuButton.addEventListener('click', () => {
-    const open = navigation.classList.toggle('open');
-    menuButton.setAttribute('aria-expanded', String(open));
-  });
-  navigation.addEventListener('click', () => {
-    navigation.classList.remove('open');
-    menuButton.setAttribute('aria-expanded', 'false');
   });
 }
 
