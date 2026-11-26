@@ -54,7 +54,8 @@ if (contactForm) {
     if (result === 'ok') terminalInput.value = '';
     terminalInput.disabled = false;
     submitButton.disabled = false;
-    terminalInput.focus();
+    if (result === 'ok') terminalLog.focus({ preventScroll: true });
+    else terminalInput.focus();
   });
 }
 

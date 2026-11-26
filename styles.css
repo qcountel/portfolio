@@ -135,8 +135,9 @@ h3 { margin: 0 0 10px; font-size: 23px; }
 .terminal-log { max-height: 100px; overflow: auto; color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
 .terminal-log:not(:empty) { margin-top: 10px; }
 .terminal-log-line { margin: 2px 0; }
-.terminal-log-ok { color: var(--accent); }
-.terminal-log-err { color: #ffc0a9; }
+.terminal-log:focus { outline: none; }
+.terminal-log-ok { color: #8fd7a0; }
+.terminal-log-err { color: #ff9b92; }
 .hp-field { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); pointer-events: none; }
 
 .site-footer { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0 28px; color: var(--muted); font-size: 14px; }
